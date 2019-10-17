@@ -1,4 +1,4 @@
-#allrgb - Use every 24b colour value for exactly one pixel.
+# allrgb - Use every 24b colour value for exactly one pixel.
 
 A copy of sino (SimplexNoise) is included.
 
