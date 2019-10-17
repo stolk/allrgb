@@ -63,6 +63,24 @@ static void generate_field
 }
 
 
+static void normalize_field( float* field )
+{
+	float lo=1.0f;
+	float hi=0.0f;
+	for ( int i=0; i<SZ*SZ; ++i )
+	{
+		const float v = field[i];
+		lo = v < lo ? v : lo;
+		hi = v > hi ? v : hi;
+	}
+	fprintf( stderr, "range: %f..%f\n", lo, hi );
+	float rng = hi-lo;
+	const float scl = 1.0f / rng;
+	for ( int i=0; i<SZ*SZ; ++i )
+		field[i] = ( field[i] - lo ) * scl;
+}
+
+
 static float* generate_image( const float* hue, const float* sat, const float *val )
 {
 	float* img = (float*)malloc( SZ * SZ * 3 * sizeof(float) );
@@ -165,6 +183,10 @@ int main( int argc, char* argv[] )
 	generate_field( (float*)hue,  0.45f, -0.57f, 0.123f, -4.8f, -2.2f,  0.33f, -0.22f, 0.12f );
 	generate_field( (float*)val, -0.55f,  0.22f, 0.955f, -1.5f,  0.5f, -0.99f,  2.48f, 2.09f );
 	generate_field( (float*)sat, -3.33f,  2.29f,-0.111f,  2.2f,  0.8f, -0.22f,  1.11f, 1.02f );
+
+	normalize_field( (float*)hue );
+	normalize_field( (float*)val );
+	normalize_field( (float*)sat );
 
 	const float* img = generate_image( (float*)hue, (float*)sat, (float*)val );
 	//const int stride = SZ*3;

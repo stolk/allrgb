@@ -6,3 +6,5 @@ A copy of stb_image_write.h is included.
 
 ![Output (scaled down.)](images/out0.png "Output in low resolution.")
 
+![Output (scaled down.)](images/out1.png "Output in low resolution, normalized hsv.")
+
