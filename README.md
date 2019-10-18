@@ -1,8 +1,10 @@
 # allrgb - Use every 24b colour value for exactly one pixel.
 
-A copy of sino (SimplexNoise) is included.
+[I'm an inline-style link](https://www.google.com)
 
-A copy of stb_image_write.h is included.
+A copy of [sino](https://github.com/stolk/sino) (SImplexNOise) is included.
+
+A copy of [stb_image_write.h](https://github.com/nothings/stb) is included.
 
 The original output:
 
