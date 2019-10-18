@@ -31,6 +31,11 @@ typedef struct
 } pixel_t;
 
 
+// Create a Simplex-Noise field, but do a double domain-warping first.
+// So x,y warped to xx,yy.
+// xx,yy warped to xxx,yyy.
+// Then xxx,yyy used as index into simplex noise field.
+// The noise has 4 octaves.
 static void generate_field
 (
 	float *field,
@@ -63,6 +68,7 @@ static void generate_field
 }
 
 
+// We normalize the field, so that all the values between 0 and 1 are used.
 static void normalize_field( float* field )
 {
 	float lo=1.0f;
@@ -81,6 +87,7 @@ static void normalize_field( float* field )
 }
 
 
+// Using hue, sat, val fields, create an RGB image.
 static float* generate_image( const float* hue, const float* sat, const float *val )
 {
 	float* img = (float*)malloc( SZ * SZ * 3 * sizeof(float) );
@@ -100,6 +107,8 @@ static float* generate_image( const float* hue, const float* sat, const float *v
 }
 
 
+// Create a HDR image with 32-bit R, 32-bit G and 32-bit B channels.
+// Record the x,y position of each pixel, so we can look that up after sorting.
 static void generate_hdr( pixel_t* hdr, const float* img )
 {
 	const float* reader = img;
@@ -119,6 +128,7 @@ static void generate_hdr( pixel_t* hdr, const float* img )
 }
 
 
+// Used by qsort() to sort pixels on RGB values.
 static int compare_pixels( const void* a, const void * b )
 {
 	const pixel_t* p0 = (const pixel_t*) a;
@@ -143,6 +153,7 @@ static int compare_pixels( const void* a, const void * b )
 }
 
 
+// Convert an index into the sorted list (0x000000 to 0xffffff) back into an 24b RGB colour.
 static void get_colour(int i, unsigned char* rgb)
 {
 	// R7 G7 B7 R6 G6 B6 R5 G5 B5 R4 G4 B4 R3 G3 B3 R2 G2 B2 R1 G1 B1 R0 G0 B0
@@ -176,9 +187,10 @@ static void get_colour(int i, unsigned char* rgb)
 }
 
 
+// Main program that uses Simplex Noise to generate HSV fields, converts to RGB, sorts on RGB, and generates the output with a unique colour for each pixel.
 int main( int argc, char* argv[] )
 {
-	sino_init();
+	sino_init();	// Initialize SimplexNoise data tables.
 
 	generate_field( (float*)hue,  0.45f, -0.57f, 0.123f, -4.8f, -2.2f,  0.33f, -0.22f, 0.12f );
 	generate_field( (float*)val, -0.55f,  0.22f, 0.955f, -1.5f,  0.5f, -0.99f,  2.48f, 2.09f );
@@ -189,8 +201,6 @@ int main( int argc, char* argv[] )
 	normalize_field( (float*)sat );
 
 	const float* img = generate_image( (float*)hue, (float*)sat, (float*)val );
-	//const int stride = SZ*3;
-	//stbi_write_png( "out.png", SZ, SZ, 3, img, stride );
 
 	pixel_t* hdr = (pixel_t*) malloc( SZ * SZ * sizeof(pixel_t) );
 	generate_hdr( hdr, img );
@@ -199,20 +209,16 @@ int main( int argc, char* argv[] )
 
 	qsort( hdr, SZ*SZ, sizeof(pixel_t), compare_pixels );
 
-	//unsigned char* writer=out;
 	for ( int i=0; i<SZ*SZ; ++i )
 	{
-#if 1
 		const int x = hdr[i].x;
 		const int y = hdr[i].y;
 		unsigned char* writer = out + ( y * SZ + x ) * 3;
 		get_colour( i, writer );
-#else
-		get_colour( i, writer );
-		writer += 3;
-#endif
 	}
 
+	// Somehow, this doesn't work for 4096x4096 images?
+	//const int stride = SZ*3;
 	//stbi_write_png( "out.png", SZ, SZ, 3, out, stride );
 
 	FILE* f;
@@ -237,7 +243,7 @@ int main( int argc, char* argv[] )
 	write_ppm_3channel( f, (float*) img, SZ );
 	fclose(f);
 
-	sino_exit();
+	sino_exit();	// Clean Up SimplexNoise data tables.
 
 	return 0;
 }
