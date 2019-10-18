@@ -18,3 +18,5 @@ Here is a video of me, doing the live coding session, writing this code:
 
 https://youtu.be/DwJgD4A3AOw 
 
+You can get the [fullsize image here](https://stolk.org/tmp/all.png).
+
